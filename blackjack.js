@@ -58,15 +58,15 @@ function getHandValue(hand) {
     return val;
 }
 
-// CUTE NEW ANIMATION HANDLER
-function triggerResultAnimation(type, amountText, delay = 0) {
+// UPGRADED ANIMATION TRIGGER
+function showResultToast(type, text, delay = 0) {
     setTimeout(() => {
         const container = document.querySelector('.blackjack-container');
         const toast = document.createElement('div');
-        toast.className = `result-toast toast-${type.toLowerCase()}`;
-        toast.innerText = `${type} ${amountText}`;
+        toast.className = `result-toast toast-${type}`;
+        toast.innerText = text;
         container.appendChild(toast);
-        setTimeout(() => toast.remove(), 1800);
+        setTimeout(() => toast.remove(), 1600);
     }, delay);
 }
 
@@ -122,27 +122,40 @@ function bjFinishDealer() {
     }
     let totalWinnings = 0, results = [];
     const dVal = getHandValue(dealerHand);
-
+    
     playerHands.forEach((hand, i) => {
         const pVal = getHandValue(hand);
         const isBJ = pVal === 21 && hand.length === 2;
-        let winAmount = 0, type = "", amtText = "";
+        let winAmount = 0, handResult = "", toastType = "lose", toastText = "";
 
         if(pVal > 21) {
-            type = "BUST"; amtText = `-${currentBet}`;
+            handResult = "Bust";
+            toastText = `BUST -${currentBet}`;
+            toastType = "lose";
         } else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) {
-            winAmount = currentBet * 2.5; type = "BLACKJACK"; amtText = `+${winAmount}`;
+            winAmount = currentBet * 2.5;
+            handResult = "BLACKJACK!";
+            toastText = `BLACKJACK! +${winAmount}`;
+            toastType = "win";
         } else if(dVal > 21 || pVal > dVal) {
-            winAmount = currentBet * 2; type = "WIN"; amtText = `+${winAmount}`;
+            winAmount = currentBet * 2;
+            handResult = "Win";
+            toastText = `WIN +${winAmount}`;
+            toastType = "win";
         } else if(pVal === dVal) {
-            winAmount = currentBet; type = "PUSH"; amtText = "+0";
+            winAmount = currentBet;
+            handResult = "Push";
+            toastText = `PUSH (RETURNED)`;
+            toastType = "push";
         } else {
-            type = "LOSE"; amtText = `-${currentBet}`;
+            handResult = "Lose";
+            toastText = `LOSE -${currentBet}`;
+            toastType = "lose";
         }
 
+        showResultToast(toastType, toastText, i * 400);
         totalWinnings += winAmount;
-        results.push(type);
-        triggerResultAnimation(type, amtText, i * 500);
+        results.push(handResult);
     });
 
     bjBalance += totalWinnings;
