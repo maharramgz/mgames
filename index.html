@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="memorygrid.css">
     <link rel="stylesheet" href="blackjack.css">
+    <link rel="stylesheet" href="dicegame.css">
 </head>
 <body>
 
@@ -33,6 +34,13 @@
             <div class="game-info">
                 <h3>Blackjack</h3>
                 <p>Bet your tokens and beat the dealer. Split your pairs to double the fun!</p>
+            </div>
+        </div>
+        <div class="game-card" onclick="openDiceGame()">
+            <div class="game-thumb">🎲</div>
+            <div class="game-info">
+                <h3>Dice Game</h3>
+                <p>Under, Over or 7?</p>
             </div>
         </div>
     </div>
@@ -104,6 +112,63 @@
                 <button class="bj-btn btn-deal-start" style="width:100%;" onclick="bjResetBankroll()">REFILL $100</button>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="dice-view" style="display:none;">
+    <div class="dice-table">
+        <div class="bj-stats">
+            <div>BANK: $<span id="dice-balance">0</span></div>
+        </div>
+
+        <div id="dice-status" style="font-weight:900; color:white; margin:10px 0; height:20px;"></div>
+
+        <div class="dice-area">
+            <div id="die-1" class="die"></div>
+            <div id="die-2" class="die"></div>
+        </div>
+
+        <div class="dice-options">
+            <button id="opt-under" class="opt-btn" onclick="selectDiceOption('under')">
+                <span class="opt-title">UNDER 7</span>
+                <span class="opt-payout">2x</span>
+            </button>
+            <button id="opt-seven" class="opt-btn" onclick="selectDiceOption('seven')">
+                <span class="opt-title">EXACT 7</span>
+                <span class="opt-payout">5x</span>
+            </button>
+            <button id="opt-over" class="opt-btn" onclick="selectDiceOption('over')">
+                <span class="opt-title">OVER 7</span>
+                <span class="opt-payout">2x</span>
+            </button>
+        </div>
+
+        <div class="bet-display-wrapper">
+            <div id="dice-bet-display" class="bet-amount-text" style="color:#064e3b">0</div>
+        </div>
+
+        <div class="chip-rack">
+            <div class="chip c1" onclick="diceAddChip(1)">1</div>
+            <div class="chip c5" onclick="diceAddChip(5)">5</div>
+            <div class="chip c10" onclick="diceAddChip(10)">10</div>
+            <div class="chip c50" onclick="diceAddChip(50)">50</div>
+            <div class="chip c100" onclick="diceAddChip(100)">100</div>
+        </div>
+
+        <div class="chip-actions">
+            <button class="bj-btn btn-clear" onclick="diceClearBet()">CLEAR</button>
+            <button id="roll-btn" class="roll-btn" onclick="rollDice()">ROLL</button>
+        </div>
+
+        <button class="back-btn" style="margin-top: 20px;" onclick="resetToHome()">← Back to Library</button>
+
+        <div id="bankrupt-dice" class="bankrupt-overlay">
+            <div class="bankrupt-modal">
+                <h2 style="color:white; margin-top:0;">BANKRUPT!</h2>
+                <button class="bj-btn btn-deal-start" style="width:100%;" onclick="diceBalance=100; updateDiceStats(); document.getElementById('bankrupt-dice').style.display='none';">REFILL $100</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="guide-modal" class="modal">
@@ -140,6 +205,7 @@
 
 <script src="memorygrid.js"></script>
 <script src="blackjack.js"></script>
+<script src="dicegame.js"></script>
 <script>
     function filterGames() {
         const query = document.getElementById('searchInput').value.toLowerCase();
