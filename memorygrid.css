@@ -1,0 +1,9 @@
+#game-view { display: none; flex-direction: column; align-items: center; }
+
+#grid-wrapper { display: flex; justify-content: center; width: 100%; }
+.grid { display: inline-grid; gap: 8px; background: #1e293b; padding: 20px; border-radius: 12px; margin: 10px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); justify-content: center; }
+.card { width: 42px; height: 42px; background: #0f172a; border-radius: 5px; border: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+.card.reveal-green { background: var(--accent) !important; box-shadow: 0 0 10px var(--accent); }
+.card.reveal-red { background: var(--red) !important; box-shadow: 0 0 10px var(--red); }
+.card.active-row { border: 2px solid var(--accent); cursor: pointer; position: relative; }
+.card.active-row:hover { background: rgba(78, 204, 163, 0.1); }

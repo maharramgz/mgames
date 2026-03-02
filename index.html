@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M Games - 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="memorygrid.css">
+    <link rel="stylesheet" href="blackjack.css">
+</head>
+<body>
+
+<header>
+    <div class="logo" onclick="resetToHome()">
+        <div class="logo-icon">M</div>
+        <span>Games</span>
+    </div>
+    <input type="text" class="search-bar" placeholder="Search library..." id="searchInput" onkeyup="filterGames()">
+</header>
+
+<main id="library-view" class="container">
+    <h2 style="margin-bottom: 25px; font-weight: 700;">Library</h2>
+    <div class="game-grid" id="gameGrid">
+        <div class="game-card" onclick="openMemoryGrid()">
+            <div class="game-thumb">🟩</div>
+            <div class="game-info">
+                <h3>Memory Grid</h3>
+                <p>Memorize the pattern of green blocks and recall them row by row. Quick eyes required!</p>
+            </div>
+        </div>
+        <div class="game-card" onclick="openBlackjack()">
+            <div class="game-thumb">🃏</div>
+            <div class="game-info">
+                <h3>Blackjack</h3>
+                <p>Bet your tokens and beat the dealer. Split your pairs to double the fun!</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="game-view" class="container">
+    <button class="back-btn" onclick="resetToHome()">← Back to Library</button>
+    <div style="text-align: center;">
+        <h1 id="game-title" style="margin: 0; color: var(--accent);">Memory Grid</h1>
+        <p id="instruction" style="opacity: 0.7; margin: 10px 0;">Select your difficulty</p>
+        <div id="timer" style="font-size: 3rem; color: var(--red); font-weight: 900; height: 60px;">--</div>
+        <div id="grid-wrapper">
+            <div id="grid" class="grid"></div>
+        </div>
+        <button id="start-btn" style="display:none; margin: 20px auto; padding: 16px 45px; background: var(--accent); border: none; border-radius: 8px; font-weight: 800; cursor: pointer; color: var(--bg); font-size: 1rem;" onclick="startMemorizePhase()">START CLOCK</button>
+    </div>
+</div>
+
+<div id="blackjack-view" class="container">
+    <button class="back-btn" onclick="resetToHome()">← Back to Library</button>
+    <div class="blackjack-container">
+        <div id="bankrupt-screen" class="bankrupt-overlay">
+            <div class="bankrupt-text">BANKRUPT</div>
+            <button class="bj-btn btn-hit" onclick="bjResetBankroll()">START OVER</button>
+        </div>
+
+        <div class="bj-stats">
+            <div>Tokens: <span id="bj-balance" style="color: var(--gold);">100</span></div>
+            <div>Best: <span id="bj-highscore" style="color: var(--accent);">100</span></div>
+        </div>
+
+        <div class="hand-label">DEALER <span class="score-badge" id="dealer-score">0</span></div>
+        <div id="dealer-hand" class="hand"></div>
+
+        <div class="hand-label">YOUR HANDS</div>
+        <div id="player-hands-container">
+            <div id="hand-0" class="hand"></div>
+        </div>
+
+        <div id="bj-status" style="margin: 15px; font-weight: bold; color: var(--accent); min-height: 24px;">Place your bet!</div>
+
+        <div id="betting-area">
+            <button id="bet-trigger-btn" class="bj-btn" onclick="toggleNumpad()">PLACE YOUR BET</button>
+
+            <div id="numpad-container">
+                <div class="bet-display-wrapper">
+                    <div style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase;">Current Bet</div>
+                    <div id="bet-display" class="bet-amount-text">10</div>
+                </div>
+                <div class="numpad-grid">
+                    <button class="num-btn" onclick="bjInputBet(1)">1</button>
+                    <button class="num-btn" onclick="bjInputBet(2)">2</button>
+                    <button class="num-btn" onclick="bjInputBet(3)">3</button>
+                    <button class="num-btn" onclick="bjInputBet(4)">4</button>
+                    <button class="num-btn" onclick="bjInputBet(5)">5</button>
+                    <button class="num-btn" onclick="bjInputBet(6)">6</button>
+                    <button class="num-btn" onclick="bjInputBet(7)">7</button>
+                    <button class="num-btn" onclick="bjInputBet(8)">8</button>
+                    <button class="num-btn" onclick="bjInputBet(9)">9</button>
+                    <button class="num-btn action" onclick="bjClearBet()">CLR</button>
+                    <button class="num-btn" onclick="bjInputBet(0)">0</button>
+                    <button class="num-btn action max" onclick="bjMaxBet()">MAX</button>
+                </div>
+                <button class="bj-btn btn-deal" onclick="bjStartRound()">CONFIRM & DEAL</button>
+            </div>
+        </div>
+
+        <div id="action-area" class="bj-controls" style="display:none;">
+            <button class="bj-btn btn-hit" onclick="bjPlayerHit()">HIT</button>
+            <button class="bj-btn btn-stand" onclick="bjPlayerStand()">STAND</button>
+            <button id="split-btn" class="bj-btn btn-split" onclick="bjPlayerSplit()" style="display:none;">SPLIT</button>
+        </div>
+    </div>
+</div>
+
+<div id="guide-modal" class="modal">
+    <div class="modal-content">
+        <h2 style="color: var(--accent); margin-top: 0;">How to Play</h2>
+        <div class="guide-text">
+            1. <strong>Memorize:</strong> Study the green blocks before the timer hits zero.<br><br>
+            2. <strong>Recall:</strong> Click the correct spots starting from <strong>Row 1</strong> (bottom).<br><br>
+            3. <strong>Precision:</strong> One wrong click ends the run!
+        </div>
+        <button class="diff-btn" style="background: var(--accent); justify-content: center; color: var(--bg);" onclick="showDifficulty()">CONTINUE</button>
+    </div>
+</div>
+
+<div id="difficulty-modal" class="modal">
+    <div class="modal-content">
+        <h2 style="margin-top: 0;">Select Difficulty</h2>
+        <button class="diff-btn" style="background: #4ecca3; color: #0f172a;" onclick="setDifficulty('easy')">
+            <span>EASY (5s Time)</span>
+            <span class="high-score-label" id="best-easy">Best: 0</span>
+        </button>
+        <button class="diff-btn" style="background: #fca311; color: #0f172a;" onclick="setDifficulty('medium')">
+            <span>MEDIUM (25s Time)</span>
+            <span class="high-score-label" id="best-medium">Best: 0</span>
+        </button>
+        <button class="diff-btn" style="background: #e94560; color: white;" onclick="setDifficulty('hard')">
+            <span>HARD (1 min)</span>
+            <span class="high-score-label" id="best-hard">Best: 0</span>
+        </button>
+    </div>
+</div>
+
+<footer>Developed by <span>Maharram Guluzade</span> &nbsp;|&nbsp; M Games 2026</footer>
+
+<script src="memorygrid.js"></script>
+<script src="blackjack.js"></script>
+<script>
+    function filterGames() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.game-card').forEach(card => {
+            const title = card.querySelector('h3')?.innerText.toLowerCase() || "";
+            card.style.display = title.includes(query) ? "block" : "none";
+        });
+    }
+    function resetToHome() { location.reload(); }
+</script>
+</body>
+</html>
