@@ -51,36 +51,34 @@
     </div>
 </div>
 
-<div id="blackjack-view" class="container">
-    <button class="back-btn" onclick="resetToHome()">← Back to Library</button>
+<div id="blackjack-view">
     <div class="blackjack-container">
-        <div id="bankrupt-screen" class="bankrupt-overlay">
-            <div class="bankrupt-text">BANKRUPT</div>
-            <button class="bj-btn btn-hit" onclick="bjResetBankroll()">START OVER</button>
-        </div>
-
         <div class="bj-stats">
-            <div>Tokens: <span id="bj-balance" style="color: var(--gold);">100</span></div>
-            <div>Best: <span id="bj-highscore" style="color: var(--accent);">100</span></div>
+            <div>BANK: $<span id="bj-balance">0</span></div>
+            <div style="color:var(--gold)">BEST: $<span id="bj-highscore">0</span></div>
         </div>
 
-        <div class="hand-label">DEALER <span class="score-badge" id="dealer-score">0</span></div>
+        <div id="dealer-score-area">
+            <span id="dealer-score-badge" class="score-badge">0</span>
+        </div>
         <div id="dealer-hand" class="hand"></div>
 
-        <div class="hand-label">YOUR HANDS</div>
-        <div id="player-hands-container">
-            <div id="hand-0" class="hand"></div>
-        </div>
+        <div id="bj-status" style="height:20px; font-weight:900; color:var(--gold); margin:10px 0;"></div>
 
-        <div id="bj-status" style="margin: 15px; font-weight: bold; color: var(--accent); min-height: 24px;">Place your bet!</div>
+        <div id="player-hands-container"></div>
+
+        <div id="action-area" class="bj-controls" style="display:none;">
+            <button class="bj-btn btn-hit" onclick="bjPlayerHit()">HIT</button>
+            <button class="bj-btn btn-stand" onclick="bjPlayerStand()">STAND</button>
+            <button id="double-btn" class="bj-btn btn-double" onclick="bjPlayerDouble()">DOUBLE</button>
+            <button id="split-btn" class="bj-btn btn-split" onclick="bjPlayerSplit()">SPLIT</button>
+        </div>
 
         <div id="betting-area">
             <div id="chip-container">
                 <div class="bet-display-wrapper">
-                    <div class="hand-label">TOTAL BET</div>
                     <div id="bet-display" class="bet-amount-text">0</div>
                 </div>
-
                 <div class="chip-rack">
                     <div class="chip c1" onclick="bjAddChip(1)">1</div>
                     <div class="chip c5" onclick="bjAddChip(5)">5</div>
@@ -92,7 +90,6 @@
                     <div class="chip c1000" onclick="bjAddChip(1000)">1k</div>
                     <div class="chip c5000" onclick="bjAddChip(5000)">5k</div>
                 </div>
-
                 <div class="chip-actions">
                     <button class="bj-btn btn-clear" onclick="bjClearBet()">CLEAR</button>
                     <button class="bj-btn btn-deal-start" onclick="bjStartRound()">DEAL</button>
@@ -100,13 +97,13 @@
             </div>
         </div>
 
-        <div id="action-area" class="bj-controls" style="display:none;">
-            <button class="bj-btn btn-hit" onclick="bjPlayerHit()">HIT</button>
-            <button class="bj-btn btn-stand" onclick="bjPlayerStand()">STAND</button>
-            <button id="double-btn" class="bj-btn btn-double" onclick="bjPlayerDouble()">DOUBLE</button>
-            <button id="split-btn" class="bj-btn btn-split" onclick="bjPlayerSplit()">SPLIT</button>
+        <div id="bankrupt-screen" class="bankrupt-overlay">
+            <div class="bankrupt-modal">
+                <h2 style="color:white; margin-top:0;">BANKRUPT!</h2>
+                <p style="color:rgba(255,255,255,0.7); font-size:0.9rem;">You're out of cash. Want to try again?</p>
+                <button class="bj-btn btn-deal-start" style="width:100%;" onclick="bjResetBankroll()">REFILL $100</button>
+            </div>
         </div>
-    </div>
 </div>
 
 <div id="guide-modal" class="modal">
