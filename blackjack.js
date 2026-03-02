@@ -15,11 +15,10 @@ function openBlackjack() {
 function toggleNumpad() {
     const pad = document.getElementById('numpad-container');
     const trigger = document.getElementById('bet-trigger-btn');
-    if (pad.style.display === 'none' || pad.style.display === '') {
-        pad.style.display = 'block'; trigger.style.display = 'none';
-    } else {
-        pad.style.display = 'none'; trigger.style.display = 'block';
-    }
+    const isHidden = (pad.style.display === 'none' || pad.style.display === '');
+    pad.style.display = isHidden ? 'block' : 'none';
+    trigger.style.display = isHidden ? 'none' : 'block';
+    if(isHidden) pad.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function bjInputBet(num) {
@@ -80,9 +79,9 @@ function bjStartRound() {
     document.getElementById('betting-area').style.display = 'none';
     renderAllHands(true);
     if(getHandValue(playerHands[0]) === 21) {
-        bjFinishDealer();
+        bjFinishDealer(); 
     } else {
-        document.getElementById('action-area').style.display = 'flex';
+        document.getElementById('action-area').style.display = 'grid'; // Grid for mobile
         document.getElementById('split-btn').style.display = (playerHands[0][0].v === playerHands[0][1].v && bjBalance >= currentBet) ? 'block' : 'none';
         document.getElementById('bj-status').innerText = "Good Luck!";
     }
@@ -126,7 +125,7 @@ function bjFinishDealer() {
         const isBJ = pVal === 21 && hand.length === 2;
         let winAmount = 0, handResult = "";
         if(pVal > 21) handResult = "Bust";
-        else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) { winAmount = currentBet * 2.5; handResult = "BLACKJACK!"; showWinAnimation(`+${winAmount}`, i * 400); }
+        else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) { winAmount = currentBet * 2.5; handResult = "BJ!"; showWinAnimation(`+${winAmount}`, i * 400); }
         else if(dVal > 21 || pVal > dVal) { winAmount = currentBet * 2; handResult = "Win"; showWinAnimation(`+${winAmount}`, i * 400); }
         else if(pVal === dVal) { winAmount = currentBet; handResult = "Push"; }
         else handResult = "Lose";
@@ -145,7 +144,7 @@ function bjFinishDealer() {
 function renderAllHands(hideDealer) {
     const dScore = hideDealer ? getHandValue([dealerHand[1]]) : getHandValue(dealerHand);
     document.getElementById('dealer-score').innerText = dScore;
-    renderHandUI('dealer-hand', dealerHand, hideDealer);
+    renderHandUI('dealer-hand', dealerHand, hideFirst = hideDealer);
     const container = document.getElementById('player-hands-container');
     container.innerHTML = '';
     playerHands.forEach((hand, i) => {
