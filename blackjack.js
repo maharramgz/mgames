@@ -1,33 +1,28 @@
 let bjBalance = parseInt(localStorage.getItem('bj-balance')) || 100;
 let bjHighScore = parseInt(localStorage.getItem('bj-highscore')) || 100;
 let playerHands = [[]], dealerHand = [], currentBet = 0, deck = [], activeHandIndex = 0, isSplit = false;
-let handBets = []; 
-let inputBetString = "10";
+let handBets = [];
+let inputBetValue = 0; // Changed from string to number for chips
 
 function openBlackjack() {
     document.getElementById('library-view').style.display = 'none';
     document.getElementById('blackjack-view').style.display = 'flex';
-    document.getElementById('numpad-container').style.display = 'none';
-    document.getElementById('bet-trigger-btn').style.display = 'block';
+    document.getElementById('chip-container').style.display = 'block';
+    document.getElementById('betting-area').style.display = 'block';
     updateBjStats();
     updateBetDisplay();
 }
 
-function toggleNumpad() {
-    const pad = document.getElementById('numpad-container');
-    const trigger = document.getElementById('bet-trigger-btn');
-    pad.style.display = (pad.style.display === 'none' || pad.style.display === '') ? 'block' : 'none';
-    trigger.style.display = (pad.style.display === 'block') ? 'none' : 'block';
+// NEW: Adding chip values
+function bjAddChip(val) {
+    if (inputBetValue + val <= bjBalance) {
+        inputBetValue += val;
+        updateBetDisplay();
+    }
 }
 
-function bjInputBet(num) {
-    let nextBet = inputBetString === "0" ? num.toString() : inputBetString + num.toString();
-    if (parseInt(nextBet) <= bjBalance) { inputBetString = nextBet; updateBetDisplay(); }
-}
-
-function bjClearBet() { inputBetString = "0"; updateBetDisplay(); }
-function bjMaxBet() { inputBetString = bjBalance.toString(); updateBetDisplay(); }
-function updateBetDisplay() { document.getElementById('bet-display').innerText = inputBetString; }
+function bjClearBet() { inputBetValue = 0; updateBetDisplay(); }
+function updateBetDisplay() { document.getElementById('bet-display').innerText = inputBetValue; }
 
 function updateBjStats() {
     document.getElementById('bj-balance').innerText = Math.floor(bjBalance);
@@ -65,22 +60,22 @@ function showResultToast(type, text, delay = 0) {
 }
 
 function bjStartRound() {
-    currentBet = parseInt(inputBetString);
+    currentBet = inputBetValue;
     if(currentBet <= 0 || currentBet > bjBalance) return;
-    bjBalance -= currentBet; 
-    handBets = [currentBet]; 
+    bjBalance -= currentBet;
+    handBets = [currentBet];
     updateBjStats(); createDeck();
-    
+
     playerHands = [[deck.pop(), deck.pop()]];
     dealerHand = [deck.pop(), deck.pop()];
     activeHandIndex = 0; isSplit = false;
 
-    document.getElementById('numpad-container').style.display = 'none';
+    document.getElementById('chip-container').style.display = 'none';
     document.getElementById('betting-area').style.display = 'none';
     renderAllHands(true);
 
     if(getHandValue(playerHands[0]) === 21) {
-        bjFinishDealer(); 
+        bjFinishDealer();
     } else {
         document.getElementById('action-area').style.display = 'grid';
         updateActionButtons();
@@ -92,18 +87,17 @@ function updateActionButtons() {
     const currentHand = playerHands[activeHandIndex];
     const canDouble = currentHand.length === 2 && bjBalance >= handBets[activeHandIndex];
     const canSplit = !isSplit && currentHand.length === 2 && currentHand[0].v === currentHand[1].v && bjBalance >= currentBet;
-    
     document.getElementById('double-btn').style.display = canDouble ? 'block' : 'none';
     document.getElementById('split-btn').style.display = canSplit ? 'block' : 'none';
 }
 
 function bjPlayerSplit() {
-    bjBalance -= currentBet; 
-    handBets = [currentBet, currentBet]; 
+    bjBalance -= currentBet;
+    handBets = [currentBet, currentBet];
     updateBjStats(); isSplit = true;
     const card2 = playerHands[0].pop();
     playerHands.push([card2]);
-    playerHands[0].push(deck.pop()); 
+    playerHands[0].push(deck.pop());
     playerHands[1].push(deck.pop());
     renderAllHands(true);
     updateActionButtons();
@@ -122,7 +116,7 @@ function bjPlayerHit() {
 function bjPlayerDouble() {
     const betToDouble = handBets[activeHandIndex];
     bjBalance -= betToDouble;
-    handBets[activeHandIndex] *= 2; 
+    handBets[activeHandIndex] *= 2;
     updateBjStats();
     playerHands[activeHandIndex].push(deck.pop());
     renderAllHands(true);
@@ -131,7 +125,7 @@ function bjPlayerDouble() {
 
 function bjPlayerStand() {
     if(isSplit && activeHandIndex === 0) {
-        activeHandIndex = 1; 
+        activeHandIndex = 1;
         renderAllHands(true);
         updateActionButtons();
         if(getHandValue(playerHands[1]) === 21) bjFinishDealer();
@@ -147,46 +141,32 @@ function bjFinishDealer() {
     }
     let totalWinnings = 0, results = [];
     const dVal = getHandValue(dealerHand);
-    
+
     playerHands.forEach((hand, i) => {
         const pVal = getHandValue(hand);
         const thisHandBet = handBets[i];
         const isBJ = pVal === 21 && hand.length === 2;
-        let winAmount = 0, handResult = "", toastType = "lose", toastText = "";
+        let winAmount = 0, toastType = "lose", toastText = "";
 
-        if(pVal > 21) {
-            handResult = "Bust";
-            toastText = `BUST -${thisHandBet}`;
-        } else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) {
-            winAmount = thisHandBet * 2.5;
-            handResult = "BLACKJACK!";
-            toastText = `BLACKJACK! +${winAmount}`;
-            toastType = "win";
+        if(pVal > 21) { toastText = `BUST -${thisHandBet}`; results.push("Bust"); }
+        else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) {
+            winAmount = thisHandBet * 2.5; toastText = `BLACKJACK! +${winAmount}`; toastType = "win"; results.push("BJ");
         } else if(dVal > 21 || pVal > dVal) {
-            winAmount = thisHandBet * 2;
-            handResult = "Win";
-            toastText = `WIN +${winAmount}`;
-            toastType = "win";
+            winAmount = thisHandBet * 2; toastText = `WIN +${winAmount}`; toastType = "win"; results.push("Win");
         } else if(pVal === dVal) {
-            winAmount = thisHandBet;
-            handResult = "Push";
-            toastText = `PUSH (RETURNED)`;
-            toastType = "push";
-        } else {
-            handResult = "Lose";
-            toastText = `LOSE -${thisHandBet}`;
-        }
+            winAmount = thisHandBet; toastText = `PUSH`; toastType = "push"; results.push("Push");
+        } else { toastText = `LOSE -${thisHandBet}`; results.push("Lose"); }
 
         showResultToast(toastType, toastText, i * 400);
         totalWinnings += winAmount;
-        results.push(handResult);
     });
 
     bjBalance += totalWinnings;
     document.getElementById('bj-status').innerText = results.join(" | ");
     document.getElementById('betting-area').style.display = 'block';
-    document.getElementById('bet-trigger-btn').style.display = 'block';
-    if (parseInt(inputBetString) > bjBalance) inputBetString = bjBalance.toString();
+    document.getElementById('chip-container').style.display = 'block';
+
+    if (inputBetValue > bjBalance) inputBetValue = 0;
     updateBetDisplay(); updateBjStats();
     if(bjBalance <= 0) document.getElementById('bankrupt-screen').style.display = 'flex';
 }
@@ -200,17 +180,9 @@ function renderAllHands(hideDealer) {
     playerHands.forEach((hand, i) => {
         const wrap = document.createElement('div');
         wrap.className = `hand ${i === activeHandIndex && isSplit ? 'active-hand' : ''}`;
-        
         const label = document.createElement('div');
         label.className = 'hand-label';
-        
-        // ADDED: The Bet Badge here to show current stake per hand
-        label.innerHTML = `
-            ${isSplit ? 'HAND '+(i+1) : 'YOUR SCORE'}<br>
-            <div class="bet-badge">$${handBets[i]}</div><br>
-            <span class="score-badge">${getHandValue(hand)}</span>
-        `;
-        
+        label.innerHTML = `${isSplit ? 'HAND '+(i+1) : 'YOUR SCORE'}<br><div class="bet-badge">$${handBets[i]}</div><br><span class="score-badge">${getHandValue(hand)}</span>`;
         container.appendChild(label);
         container.appendChild(wrap);
         hand.forEach(c => {
@@ -232,7 +204,7 @@ function renderHandUI(id, hand, hideFirst) {
 }
 
 function bjResetBankroll() {
-    bjBalance = 100; inputBetString = "10";
+    bjBalance = 100; inputBetValue = 0;
     updateBjStats(); updateBetDisplay();
     document.getElementById('bankrupt-screen').style.display = 'none';
 }
