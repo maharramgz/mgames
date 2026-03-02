@@ -1,6 +1,7 @@
 let bjBalance = parseInt(localStorage.getItem('bj-balance')) || 100;
 let bjHighScore = parseInt(localStorage.getItem('bj-highscore')) || 100;
 let playerHands = [[]], dealerHand = [], currentBet = 0, deck = [], activeHandIndex = 0, isSplit = false;
+let handBets = []; // Track individual bets for split/double hands
 let inputBetString = "10";
 
 function openBlackjack() {
@@ -15,19 +16,13 @@ function openBlackjack() {
 function toggleNumpad() {
     const pad = document.getElementById('numpad-container');
     const trigger = document.getElementById('bet-trigger-btn');
-    if (pad.style.display === 'none' || pad.style.display === '') {
-        pad.style.display = 'block'; trigger.style.display = 'none';
-    } else {
-        pad.style.display = 'none'; trigger.style.display = 'block';
-    }
+    pad.style.display = (pad.style.display === 'none' || pad.style.display === '') ? 'block' : 'none';
+    trigger.style.display = (pad.style.display === 'block') ? 'none' : 'block';
 }
 
 function bjInputBet(num) {
     let nextBet = inputBetString === "0" ? num.toString() : inputBetString + num.toString();
-    if (parseInt(nextBet) <= bjBalance) {
-        inputBetString = nextBet;
-        updateBetDisplay();
-    }
+    if (parseInt(nextBet) <= bjBalance) { inputBetString = nextBet; updateBetDisplay(); }
 }
 
 function bjClearBet() { inputBetString = "0"; updateBetDisplay(); }
@@ -58,7 +53,6 @@ function getHandValue(hand) {
     return val;
 }
 
-// UPGRADED ANIMATION TRIGGER
 function showResultToast(type, text, delay = 0) {
     setTimeout(() => {
         const container = document.querySelector('.blackjack-container');
@@ -73,29 +67,46 @@ function showResultToast(type, text, delay = 0) {
 function bjStartRound() {
     currentBet = parseInt(inputBetString);
     if(currentBet <= 0 || currentBet > bjBalance) return;
-    bjBalance -= currentBet; updateBjStats(); createDeck();
+    bjBalance -= currentBet; 
+    handBets = [currentBet]; // Initialize bet for first hand
+    updateBjStats(); createDeck();
+    
     playerHands = [[deck.pop(), deck.pop()]];
     dealerHand = [deck.pop(), deck.pop()];
     activeHandIndex = 0; isSplit = false;
+
     document.getElementById('numpad-container').style.display = 'none';
     document.getElementById('betting-area').style.display = 'none';
     renderAllHands(true);
+
     if(getHandValue(playerHands[0]) === 21) {
         bjFinishDealer(); 
     } else {
         document.getElementById('action-area').style.display = 'grid';
-        document.getElementById('split-btn').style.display = (playerHands[0][0].v === playerHands[0][1].v && bjBalance >= currentBet) ? 'block' : 'none';
+        updateActionButtons();
         document.getElementById('bj-status').innerText = "Good Luck!";
     }
 }
 
+function updateActionButtons() {
+    const currentHand = playerHands[activeHandIndex];
+    const canDouble = currentHand.length === 2 && bjBalance >= handBets[activeHandIndex];
+    const canSplit = !isSplit && currentHand.length === 2 && currentHand[0].v === currentHand[1].v && bjBalance >= currentBet;
+    
+    document.getElementById('double-btn').style.display = canDouble ? 'block' : 'none';
+    document.getElementById('split-btn').style.display = canSplit ? 'block' : 'none';
+}
+
 function bjPlayerSplit() {
-    bjBalance -= currentBet; updateBjStats(); isSplit = true;
+    bjBalance -= currentBet; 
+    handBets = [currentBet, currentBet]; // Two hands, two equal bets
+    updateBjStats(); isSplit = true;
     const card2 = playerHands[0].pop();
     playerHands.push([card2]);
-    playerHands[0].push(deck.pop()); playerHands[1].push(deck.pop());
-    document.getElementById('split-btn').style.display = 'none';
+    playerHands[0].push(deck.pop()); 
+    playerHands[1].push(deck.pop());
     renderAllHands(true);
+    updateActionButtons();
 }
 
 function bjPlayerHit() {
@@ -103,12 +114,29 @@ function bjPlayerHit() {
     renderAllHands(true);
     if(getHandValue(playerHands[activeHandIndex]) >= 21) {
         bjPlayerStand();
+    } else {
+        updateActionButtons(); // Double Down only available on first hit (2 cards)
     }
+}
+
+function bjPlayerDouble() {
+    const betToDouble = handBets[activeHandIndex];
+    bjBalance -= betToDouble;
+    handBets[activeHandIndex] *= 2; // Double the bet for this hand
+    updateBjStats();
+    
+    playerHands[activeHandIndex].push(deck.pop());
+    renderAllHands(true);
+    
+    // Automatically stand after one card in Double Down
+    setTimeout(bjPlayerStand, 600);
 }
 
 function bjPlayerStand() {
     if(isSplit && activeHandIndex === 0) {
-        activeHandIndex = 1; renderAllHands(true);
+        activeHandIndex = 1; 
+        renderAllHands(true);
+        updateActionButtons();
         if(getHandValue(playerHands[1]) === 21) bjFinishDealer();
     } else { bjFinishDealer(); }
 }
@@ -125,32 +153,31 @@ function bjFinishDealer() {
     
     playerHands.forEach((hand, i) => {
         const pVal = getHandValue(hand);
+        const thisHandBet = handBets[i];
         const isBJ = pVal === 21 && hand.length === 2;
         let winAmount = 0, handResult = "", toastType = "lose", toastText = "";
 
         if(pVal > 21) {
             handResult = "Bust";
-            toastText = `BUST -${currentBet}`;
-            toastType = "lose";
+            toastText = `BUST -${thisHandBet}`;
         } else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) {
-            winAmount = currentBet * 2.5;
+            winAmount = thisHandBet * 2.5;
             handResult = "BLACKJACK!";
             toastText = `BLACKJACK! +${winAmount}`;
             toastType = "win";
         } else if(dVal > 21 || pVal > dVal) {
-            winAmount = currentBet * 2;
+            winAmount = thisHandBet * 2;
             handResult = "Win";
             toastText = `WIN +${winAmount}`;
             toastType = "win";
         } else if(pVal === dVal) {
-            winAmount = currentBet;
+            winAmount = thisHandBet;
             handResult = "Push";
             toastText = `PUSH (RETURNED)`;
             toastType = "push";
         } else {
             handResult = "Lose";
-            toastText = `LOSE -${currentBet}`;
-            toastType = "lose";
+            toastText = `LOSE -${thisHandBet}`;
         }
 
         showResultToast(toastType, toastText, i * 400);
@@ -170,7 +197,7 @@ function bjFinishDealer() {
 function renderAllHands(hideDealer) {
     const dScore = hideDealer ? getHandValue([dealerHand[1]]) : getHandValue(dealerHand);
     document.getElementById('dealer-score').innerText = dScore;
-    renderHandUI('dealer-hand', dealerHand, hideFirst = hideDealer);
+    renderHandUI('dealer-hand', dealerHand, hideDealer);
     const container = document.getElementById('player-hands-container');
     container.innerHTML = '';
     playerHands.forEach((hand, i) => {
