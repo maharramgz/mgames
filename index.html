@@ -75,28 +75,28 @@
         <div id="bj-status" style="margin: 15px; font-weight: bold; color: var(--accent); min-height: 24px;">Place your bet!</div>
 
         <div id="betting-area">
-            <button id="bet-trigger-btn" class="bj-btn" onclick="toggleNumpad()">PLACE YOUR BET</button>
-
-            <div id="numpad-container">
+            <div id="chip-container">
                 <div class="bet-display-wrapper">
-                    <div style="font-size: 0.7rem; opacity: 0.6; text-transform: uppercase;">Current Bet</div>
-                    <div id="bet-display" class="bet-amount-text">10</div>
+                    <div class="hand-label">TOTAL BET</div>
+                    <div id="bet-display" class="bet-amount-text">0</div>
                 </div>
-                <div class="numpad-grid">
-                    <button class="num-btn" onclick="bjInputBet(1)">1</button>
-                    <button class="num-btn" onclick="bjInputBet(2)">2</button>
-                    <button class="num-btn" onclick="bjInputBet(3)">3</button>
-                    <button class="num-btn" onclick="bjInputBet(4)">4</button>
-                    <button class="num-btn" onclick="bjInputBet(5)">5</button>
-                    <button class="num-btn" onclick="bjInputBet(6)">6</button>
-                    <button class="num-btn" onclick="bjInputBet(7)">7</button>
-                    <button class="num-btn" onclick="bjInputBet(8)">8</button>
-                    <button class="num-btn" onclick="bjInputBet(9)">9</button>
-                    <button class="num-btn action" onclick="bjClearBet()">CLR</button>
-                    <button class="num-btn" onclick="bjInputBet(0)">0</button>
-                    <button class="num-btn action max" onclick="bjMaxBet()">MAX</button>
+
+                <div class="chip-rack">
+                    <div class="chip c1" onclick="bjAddChip(1)">1</div>
+                    <div class="chip c5" onclick="bjAddChip(5)">5</div>
+                    <div class="chip c10" onclick="bjAddChip(10)">10</div>
+                    <div class="chip c20" onclick="bjAddChip(20)">20</div>
+                    <div class="chip c50" onclick="bjAddChip(50)">50</div>
+                    <div class="chip c100" onclick="bjAddChip(100)">100</div>
+                    <div class="chip c500" onclick="bjAddChip(500)">500</div>
+                    <div class="chip c1000" onclick="bjAddChip(1000)">1k</div>
+                    <div class="chip c5000" onclick="bjAddChip(5000)">5k</div>
                 </div>
-                <button class="bj-btn btn-deal" onclick="bjStartRound()">CONFIRM & DEAL</button>
+
+                <div class="chip-actions">
+                    <button class="bj-btn btn-clear" onclick="bjClearBet()">CLEAR</button>
+                    <button class="bj-btn btn-deal-start" onclick="bjStartRound()">DEAL</button>
+                </div>
             </div>
         </div>
 
