@@ -2,27 +2,15 @@
 
 .blackjack-container { 
     background: radial-gradient(circle at center, #1e40af 0%, #1e3a8a 100%); 
-    padding: 20px; 
-    border-radius: 30px; 
-    border: 6px solid #334155; 
-    width: 100%; 
-    max-width: 600px; 
-    text-align: center; 
-    box-shadow: 0 25px 60px rgba(0,0,0,0.6); 
-    position: relative; 
-    overflow: hidden; 
-    box-sizing: border-box; 
+    padding: 20px; border-radius: 30px; border: 6px solid #334155; 
+    width: 100%; max-width: 600px; text-align: center; 
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden; box-sizing: border-box; 
 }
 
 .bj-stats { 
-    display: flex; 
-    justify-content: space-around; 
-    margin-bottom: 20px; 
-    font-weight: 800; 
-    background: rgba(255,255,255,0.1); 
-    padding: 12px; 
-    border-radius: 15px; 
-    backdrop-filter: blur(5px);
+    display: flex; justify-content: space-around; margin-bottom: 20px; 
+    font-weight: 800; background: rgba(255,255,255,0.1); 
+    padding: 12px; border-radius: 15px; backdrop-filter: blur(5px);
 }
 
 .hand-label { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.7); }
@@ -44,36 +32,30 @@
     border: 1px solid #e2e8f0; flex-shrink: 0;
 }
 
+/* CONTROLS UPGRADE */
 .bj-controls { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-.bj-btn { padding: 15px; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+.bj-btn { padding: 15px; border-radius: 12px; border: none; cursor: pointer; font-weight: 800; font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: 0.1s; }
 .bj-btn:active { transform: translateY(2px); box-shadow: none; }
+.bj-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
 
 .btn-hit { background: var(--accent); color: var(--bg); }
 .btn-stand { background: #f87171; color: white; }
-.btn-split { background: #3b82f6; color: white; grid-column: span 2; }
+.btn-double { background: #8b5cf6; color: white; grid-column: span 1; }
+.btn-split { background: #3b82f6; color: white; grid-column: span 1; }
 .btn-deal { background: white; color: #1e3a8a; width: 100%; margin-top: 15px; grid-column: span 2; }
 
 #bet-trigger-btn { background: var(--gold); color: #431407; width: 100%; padding: 18px; font-size: 1.2rem; margin-top: 10px; border-radius: 15px; font-weight: 900; }
-
 #numpad-container { display: none; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 20px; margin-top: 15px; }
 .bet-display-wrapper { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
 .bet-amount-text { font-size: 1.8rem; color: #1e3a8a; font-weight: 900; }
 .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .num-btn { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 20px 0; border-radius: 12px; font-weight: 900; font-size: 1.3rem; }
 
-/* DYNAMIC RESULT ANIMATIONS */
 .result-toast {
-    position: absolute;
-    top: 45%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.2rem;
-    font-weight: 900;
-    z-index: 100;
-    pointer-events: none;
-    white-space: nowrap;
-    animation: toastPop 1.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 2.2rem; font-weight: 900; z-index: 100; pointer-events: none;
+    white-space: nowrap; animation: toastPop 1.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-
 .toast-win { color: var(--gold); text-shadow: 0 0 20px rgba(252, 163, 17, 0.8); }
 .toast-lose { color: #f87171; text-shadow: 0 0 20px rgba(248, 113, 113, 0.8); }
 .toast-push { color: #e2e8f0; text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
@@ -87,7 +69,5 @@
 
 @media (max-width: 600px) {
     .blackjack-container { border-radius: 0; border-width: 0 0 6px 0; padding: 15px 10px; }
-    .bj-card { width: 48px; height: 70px; font-size: 1rem; }
 }
-
 .bankrupt-overlay { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; }
