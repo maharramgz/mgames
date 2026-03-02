@@ -1,7 +1,7 @@
 let bjBalance = parseInt(localStorage.getItem('bj-balance')) || 100;
 let bjHighScore = parseInt(localStorage.getItem('bj-highscore')) || 100;
 let playerHands = [[]], dealerHand = [], currentBet = 0, deck = [], activeHandIndex = 0, isSplit = false;
-let handBets = []; // Track individual bets for split/double hands
+let handBets = []; 
 let inputBetString = "10";
 
 function openBlackjack() {
@@ -68,7 +68,7 @@ function bjStartRound() {
     currentBet = parseInt(inputBetString);
     if(currentBet <= 0 || currentBet > bjBalance) return;
     bjBalance -= currentBet; 
-    handBets = [currentBet]; // Initialize bet for first hand
+    handBets = [currentBet]; 
     updateBjStats(); createDeck();
     
     playerHands = [[deck.pop(), deck.pop()]];
@@ -99,7 +99,7 @@ function updateActionButtons() {
 
 function bjPlayerSplit() {
     bjBalance -= currentBet; 
-    handBets = [currentBet, currentBet]; // Two hands, two equal bets
+    handBets = [currentBet, currentBet]; 
     updateBjStats(); isSplit = true;
     const card2 = playerHands[0].pop();
     playerHands.push([card2]);
@@ -115,20 +115,17 @@ function bjPlayerHit() {
     if(getHandValue(playerHands[activeHandIndex]) >= 21) {
         bjPlayerStand();
     } else {
-        updateActionButtons(); // Double Down only available on first hit (2 cards)
+        updateActionButtons();
     }
 }
 
 function bjPlayerDouble() {
     const betToDouble = handBets[activeHandIndex];
     bjBalance -= betToDouble;
-    handBets[activeHandIndex] *= 2; // Double the bet for this hand
+    handBets[activeHandIndex] *= 2; 
     updateBjStats();
-    
     playerHands[activeHandIndex].push(deck.pop());
     renderAllHands(true);
-    
-    // Automatically stand after one card in Double Down
     setTimeout(bjPlayerStand, 600);
 }
 
@@ -203,9 +200,17 @@ function renderAllHands(hideDealer) {
     playerHands.forEach((hand, i) => {
         const wrap = document.createElement('div');
         wrap.className = `hand ${i === activeHandIndex && isSplit ? 'active-hand' : ''}`;
+        
         const label = document.createElement('div');
         label.className = 'hand-label';
-        label.innerHTML = `${isSplit ? 'HAND '+(i+1) : 'YOUR SCORE'}<br><span class="score-badge">${getHandValue(hand)}</span>`;
+        
+        // ADDED: The Bet Badge here to show current stake per hand
+        label.innerHTML = `
+            ${isSplit ? 'HAND '+(i+1) : 'YOUR SCORE'}<br>
+            <div class="bet-badge">$${handBets[i]}</div><br>
+            <span class="score-badge">${getHandValue(hand)}</span>
+        `;
+        
         container.appendChild(label);
         container.appendChild(wrap);
         hand.forEach(c => {
