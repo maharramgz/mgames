@@ -2,7 +2,7 @@ let bjBalance = parseInt(localStorage.getItem('bj-balance')) || 100;
 let bjHighScore = parseInt(localStorage.getItem('bj-highscore')) || 100;
 let playerHands = [[]], dealerHand = [], currentBet = 0, deck = [], activeHandIndex = 0, isSplit = false;
 let handBets = [];
-let inputBetValue = 0; // Changed from string to number for chips
+let inputBetValue = 0;
 
 function openBlackjack() {
     document.getElementById('library-view').style.display = 'none';
@@ -13,7 +13,6 @@ function openBlackjack() {
     updateBetDisplay();
 }
 
-// NEW: Adding chip values
 function bjAddChip(val) {
     if (inputBetValue + val <= bjBalance) {
         inputBetValue += val;
@@ -65,21 +64,18 @@ function bjStartRound() {
     bjBalance -= currentBet;
     handBets = [currentBet];
     updateBjStats(); createDeck();
-
     playerHands = [[deck.pop(), deck.pop()]];
     dealerHand = [deck.pop(), deck.pop()];
     activeHandIndex = 0; isSplit = false;
-
     document.getElementById('chip-container').style.display = 'none';
     document.getElementById('betting-area').style.display = 'none';
     renderAllHands(true);
-
     if(getHandValue(playerHands[0]) === 21) {
         bjFinishDealer();
     } else {
         document.getElementById('action-area').style.display = 'grid';
         updateActionButtons();
-        document.getElementById('bj-status').innerText = "Good Luck!";
+        document.getElementById('bj-status').innerText = "";
     }
 }
 
@@ -141,49 +137,45 @@ function bjFinishDealer() {
     }
     let totalWinnings = 0, results = [];
     const dVal = getHandValue(dealerHand);
-
     playerHands.forEach((hand, i) => {
         const pVal = getHandValue(hand);
         const thisHandBet = handBets[i];
         const isBJ = pVal === 21 && hand.length === 2;
         let winAmount = 0, toastType = "lose", toastText = "";
-
         if(pVal > 21) { toastText = `BUST -${thisHandBet}`; results.push("Bust"); }
         else if(isBJ && (dVal !== 21 || dealerHand.length !== 2)) {
-            winAmount = thisHandBet * 2.5; toastText = `BLACKJACK! +${winAmount}`; toastType = "win"; results.push("BJ");
+            winAmount = thisHandBet * 2.5; toastText = `BJ! +${winAmount}`; toastType = "win"; results.push("BJ");
         } else if(dVal > 21 || pVal > dVal) {
             winAmount = thisHandBet * 2; toastText = `WIN +${winAmount}`; toastType = "win"; results.push("Win");
         } else if(pVal === dVal) {
             winAmount = thisHandBet; toastText = `PUSH`; toastType = "push"; results.push("Push");
         } else { toastText = `LOSE -${thisHandBet}`; results.push("Lose"); }
-
         showResultToast(toastType, toastText, i * 400);
         totalWinnings += winAmount;
     });
-
     bjBalance += totalWinnings;
     document.getElementById('bj-status').innerText = results.join(" | ");
     document.getElementById('betting-area').style.display = 'block';
     document.getElementById('chip-container').style.display = 'block';
-
     if (inputBetValue > bjBalance) inputBetValue = 0;
     updateBetDisplay(); updateBjStats();
+
+    // Trigger the BANKRUPT MODAL
     if(bjBalance <= 0) document.getElementById('bankrupt-screen').style.display = 'flex';
 }
 
 function renderAllHands(hideDealer) {
     const dScore = hideDealer ? getHandValue([dealerHand[1]]) : getHandValue(dealerHand);
-    document.getElementById('dealer-score').innerText = dScore;
+    document.getElementById('dealer-score-badge').innerText = dScore;
     renderHandUI('dealer-hand', dealerHand, hideDealer);
     const container = document.getElementById('player-hands-container');
     container.innerHTML = '';
     playerHands.forEach((hand, i) => {
         const wrap = document.createElement('div');
         wrap.className = `hand ${i === activeHandIndex && isSplit ? 'active-hand' : ''}`;
-        const label = document.createElement('div');
-        label.className = 'hand-label';
-        label.innerHTML = `${isSplit ? 'HAND '+(i+1) : 'YOUR SCORE'}<br><div class="bet-badge">$${handBets[i]}</div><br><span class="score-badge">${getHandValue(hand)}</span>`;
-        container.appendChild(label);
+        const scoreWrap = document.createElement('div');
+        scoreWrap.innerHTML = `<div class="bet-badge">$${handBets[i]}</div><br><span class="score-badge">${getHandValue(hand)}</span>`;
+        container.appendChild(scoreWrap);
         container.appendChild(wrap);
         hand.forEach(c => {
             let div = document.createElement('div'); div.className = 'bj-card';
